@@ -1,0 +1,1013 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rota do Treinador PXG</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Direção: carcaça de Pokédex no topo, caixas de diálogo dos jogos GBA no conteúdo,
+   pokébolas marcando a rota e cores oficiais de tipo nos clãs */
+:root{
+  --bg:#E6EEF4; --tile:#DAE5EE; --box:#FFFFFF; --ink:#24304A; --muted:#55627A;
+  --frame:#3B4C6B; --frame-in:#A9BCD6; --line:#C7D4E3;
+  --dex:#D7263D; --dex-deep:#9C1528; --dex-hi:#F0566A;
+  --screen:#F3F8F6; --bezel:#E3E6EA;
+  --exp:#2E8FD6; --exp-soft:#DCEEFB; --hp:#3DBE5E; --hp-mid:#F2B705; --zap:#F5C518;
+  --f-display:"Pixelify Sans","Courier New",monospace;
+  --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121926; --tile:#172031; --box:#1C2638; --ink:#E5ECF6; --muted:#9EAEC6;
+  --frame:#7E96BD; --frame-in:#2D3B55; --line:#2B3851;
+  --dex:#C8243A; --dex-deep:#7E1020; --dex-hi:#E5485E;
+  --screen:#0F1D1B; --bezel:#3A4150;
+  --exp:#5CB4F2; --exp-soft:#1A3148; --hp:#4FD372; --hp-mid:#F5C518; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121926; --tile:#172031; --box:#1C2638; --ink:#E5ECF6; --muted:#9EAEC6;
+  --frame:#7E96BD; --frame-in:#2D3B55; --line:#2B3851;
+  --dex:#C8243A; --dex-deep:#7E1020; --dex-hi:#E5485E;
+  --screen:#0F1D1B; --bezel:#3A4150;
+  --exp:#5CB4F2; --exp-soft:#1A3148; --hp:#4FD372; --hp-mid:#F5C518; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6;
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--tile) 2px,transparent 2px),linear-gradient(90deg,var(--tile) 2px,transparent 2px);
+  background-size:32px 32px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+.wrap{max-width:980px;margin:0 auto}
+b{font-weight:700}
+a{color:var(--exp)}
+
+/* ---------- Pokédex (hero) ---------- */
+header.dex{margin-top:24px;background:var(--dex);border-radius:18px 18px 22px 22px;
+  box-shadow:inset 0 -6px 0 var(--dex-deep),inset 0 3px 0 var(--dex-hi),0 6px 0 var(--dex-deep);padding:0 0 26px;overflow:hidden}
+.dex-top{position:relative;display:flex;align-items:flex-start;gap:12px;padding:18px 22px 22px;
+  border-bottom:4px solid var(--dex-deep)}
+.dex-top::after{content:"";position:absolute;right:0;bottom:-4px;width:46%;height:22px;background:var(--dex-deep);
+  clip-path:polygon(0 100%,22px 0,100% 0,100% 100%)}
+.lens{flex:none;width:72px;height:72px;border-radius:50%;background:#fff;display:grid;place-items:center;
+  box-shadow:0 0 0 3px #1E2533,inset 0 -3px 0 #C9CED6}
+.lens::before{content:"";width:54px;height:54px;border-radius:50%;
+  background:radial-gradient(circle at 34% 30%,#BFE9FF 0 12%,#3AA8F0 30%,#1667B8 72%,#0D3F7A 100%);
+  box-shadow:inset 0 0 0 3px #0D3F7A}
+.led{width:16px;height:16px;border-radius:50%;margin-top:4px;box-shadow:0 0 0 2px #1E2533,inset -2px -2px 0 rgba(0,0,0,.25)}
+.led.r{background:#FF4D5E}.led.y{background:#FFD23F}.led.g{background:#4CD964}
+.dex-name{margin-left:auto;align-self:center;font-family:var(--f-display);font-weight:500;font-size:.95rem;color:#FFE3E7;letter-spacing:.02em}
+
+.dex-screen{margin:22px 22px 0;background:var(--bezel);padding:16px 16px 22px;border-radius:8px;
+  clip-path:polygon(0 0,100% 0,100% 100%,40px 100%,0 calc(100% - 40px));position:relative}
+.dex-screen::before{content:"";position:absolute;top:6px;left:50%;width:30px;height:5px;transform:translateX(-50%);
+  background:radial-gradient(circle,var(--dex) 2.5px,transparent 3px) 0 0/10px 5px repeat-x}
+.screen{background:var(--screen);border-radius:6px;padding:22px 24px 24px;display:grid;gap:12px;
+  box-shadow:inset 0 0 0 3px #1E2533}
+.kicker{font-family:var(--f-display);font-size:.95rem;font-weight:500;color:var(--dex)}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(2.2rem,6.4vw,3.8rem);line-height:1;margin:0;text-wrap:balance;letter-spacing:-.01em}
+.lede{max-width:62ch;color:var(--muted);margin:0;font-size:1.05rem}
+.speaker{position:absolute;right:20px;bottom:8px;width:44px;height:8px;
+  background:repeating-linear-gradient(90deg,#1E2533 0 6px,transparent 6px 10px)}
+
+/* Time da rota no visor da Pokédex */
+.party{list-style:none;margin:6px 0 0;padding:0;display:grid;grid-template-columns:repeat(6,1fr);gap:8px;max-width:560px}
+.party li{display:grid;justify-items:center;gap:0;padding:2px 0 5px;background:var(--box);border:2.5px solid #1E2533;border-radius:10px 10px 10px 2px}
+.party img{width:80px;height:60px;max-width:100%;object-fit:contain;image-rendering:pixelated}
+.party span{font-family:var(--f-display);font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* ---------- Caixa de diálogo (padrão dos jogos) ---------- */
+.notice,.stop,.checks,.clan-detail{background:var(--box);border:3px solid var(--frame);border-radius:10px;
+  box-shadow:inset 0 0 0 3px var(--box),inset 0 0 0 5px var(--frame-in)}
+.notice{position:relative;display:flex;gap:14px;align-items:flex-start;padding:16px 20px 22px;margin-top:22px;font-size:.95rem;max-width:76ch}
+.notice .bang{flex:none;font-family:var(--f-display);font-weight:700;font-size:1.3rem;line-height:1;width:30px;height:30px;
+  display:grid;place-items:center;background:var(--zap);color:#3A2A00;border-radius:6px;box-shadow:0 0 0 2px var(--frame)}
+.notice::after{content:"";position:absolute;right:16px;bottom:8px;border:7px solid transparent;border-top:9px solid var(--dex);border-bottom:0}
+.notice.warn .bang{background:var(--dex);color:#fff}
+.panel .notice{margin:0 0 24px}
+
+/* ---------- Menu de abas (cursor ▶ do jogo) ---------- */
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;margin-top:26px;padding:8px;display:flex;gap:4px;flex-wrap:wrap;
+  background:var(--box);border:3px solid var(--frame);border-radius:10px;box-shadow:0 4px 0 var(--frame-in)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.tab{position:relative;font-family:var(--f-display);font-weight:500;font-size:1.02rem;border:0;background:transparent;color:var(--muted);
+  padding:7px 12px 7px 26px;border-radius:6px;cursor:pointer;white-space:nowrap}
+.tab::before{content:"";position:absolute;left:10px;top:50%;transform:translateY(-50%);border:6px solid transparent;border-left:8px solid var(--dex);border-right:0;opacity:0}
+.tab:hover{color:var(--ink);background:var(--exp-soft)}
+.tab[aria-selected="true"]{color:var(--ink);font-weight:700}
+.tab[aria-selected="true"]::before{opacity:1}
+.tab:active{transform:translateY(1px)}
+.tab:focus-visible,.clan:focus-visible,.check input:focus-visible,a:focus-visible{outline:3px solid var(--exp);outline-offset:2px}
+
+/* ---------- Painéis ---------- */
+section.panel{padding-top:30px}
+h2{font-family:var(--f-display);font-weight:700;font-size:2rem;line-height:1.1;margin:0 0 8px}
+.sub{font-family:var(--f-display);font-weight:700;font-size:1.5rem;line-height:1.2;margin:44px 0 10px}
+.intro{color:var(--muted);margin:0 0 24px;max-width:65ch}
+.legend{font-size:.92rem;color:var(--muted);margin:0 0 16px;max-width:72ch}
+.legend b{color:var(--ink)}
+
+/* Rota com pokébolas */
+.route{position:relative;display:grid;gap:20px;padding-left:40px}
+.route::before{content:"";position:absolute;left:13px;top:10px;bottom:10px;width:6px;border-radius:3px;
+  background:repeating-linear-gradient(var(--frame) 0 8px,transparent 8px 16px);opacity:.45}
+.stop{position:relative;padding:18px 22px 20px;min-width:0}
+.stop::before{content:"";position:absolute;left:-40px;top:16px;width:26px;height:26px;border-radius:50%;
+  background:
+    radial-gradient(circle,#fff 0 3px,#1E2533 3.5px 6px,transparent 6.5px),
+    linear-gradient(var(--dex) 0 46%,#1E2533 46% 56%,#fff 56%);
+  box-shadow:0 0 0 2.5px #1E2533}
+.lv{font-family:var(--f-display);font-weight:700;font-size:.95rem;color:var(--box);background:var(--frame);padding:2px 10px 3px;border-radius:4px;display:inline-block;line-height:1.4}
+.stop h4{margin:10px 0 8px;font-size:1.2rem;line-height:1.3;text-wrap:balance}
+.stop ul{margin:0;padding-left:20px;display:grid;gap:6px}
+.stop li::marker{content:"▸ ";color:var(--dex)}
+.tip{margin:14px 0 0;font-size:.93rem;background:var(--exp-soft);border-radius:6px;padding:8px 12px;color:var(--ink);max-width:76ch}
+.tip b{color:var(--exp)}
+
+/* Pokémons que aparecem em cada faixa da rota (ícones da Pokédex) */
+.stop .dex-row,.dex-row{list-style:none;gap:0;margin:4px 0 14px;padding:2px 8px;display:flex;flex-wrap:wrap;background:var(--exp-soft);border-radius:8px;width:fit-content;max-width:100%}
+.stop .dex-row li::marker{content:none}
+.dex-row img{display:block;width:80px;height:60px;image-rendering:pixelated}
+
+/* Hunts: ficha estilo Pokédex + barra de EXP */
+.hunt dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;margin:10px 0 0}
+.hunt dt{font-family:var(--f-display);font-weight:500;color:var(--dex);padding-top:1px}
+.hunt dd{margin:0;min-width:0}
+.xp{font-family:var(--f-display);font-weight:500;font-size:.9rem;color:var(--ink);display:inline-block;margin:2px 0 2px 6px;
+  padding:1px 10px 2px 30px;border-radius:999px;background:var(--exp-soft);position:relative;font-variant-numeric:tabular-nums;white-space:nowrap}
+.xp::before{content:"EXP";position:absolute;left:3px;top:50%;transform:translateY(-50%);font-size:.6rem;font-weight:700;
+  background:var(--exp);color:#fff;border-radius:999px;padding:0 4px;line-height:1.5}
+
+/* Cena de batalha (FireRed/LeafGreen): seu pokémon de costas contra o alvo da hunt.
+   O cenário indica onde se caça: grama, água (pesca) ou caverna. */
+.battle{--sky:#E6F3EE;--ground:#E4ECC2;--pad:#A9D98A;--pad-rim:#6FA858;
+  position:relative;height:216px;margin:0 0 16px;border-radius:6px;overflow:hidden;
+  background:linear-gradient(var(--sky) 0 50%,var(--ground) 50%);box-shadow:inset 0 0 0 3px #1E2533}
+.battle[data-env="water"]{--sky:#DCEFF8;--ground:#A4D2F0;--pad:#7DB6E4;--pad-rim:#4C88C0}
+.battle[data-env="cave"]{--sky:#E6DBC8;--ground:#CDB896;--pad:#B49A72;--pad-rim:#86704E}
+.battle::before,.battle::after{content:"";position:absolute;border-radius:50%;background:var(--pad);box-shadow:inset 0 -5px 0 var(--pad-rim)}
+.battle::before{right:5%;top:96px;width:180px;height:38px}
+.battle::after{left:2%;bottom:-20px;width:230px;height:46px}
+.battle img{position:absolute;z-index:1;width:128px;height:128px;image-rendering:pixelated}
+.battle .foe{right:calc(5% + 26px);top:4px}
+.battle .ally{left:calc(2% + 50px);bottom:-8px}
+.mon-box{position:absolute;z-index:2;min-width:164px;display:grid;gap:4px;padding:5px 10px 8px;
+  font-family:var(--f-display);font-weight:500;font-size:.92rem;line-height:1.2;color:#24304A;
+  background:#FBF8E4;border:3px solid #2F3A33;border-radius:4px 12px 4px 12px;box-shadow:3px 3px 0 rgba(30,37,51,.3)}
+.mon-box .row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:0 12px}
+.mon-box .row span{white-space:nowrap}
+.mon-box .row b{font-weight:700}
+.foe-box{left:12px;top:12px}
+.ally-box{right:12px;bottom:12px}
+.bar{display:flex;align-items:center;gap:5px;font-size:.62rem;font-weight:700;color:#F2B705}
+.bar::before{content:attr(data-k);background:#2F3A33;border-radius:3px;padding:0 4px;line-height:1.5}
+.bar::after{content:"";flex:1;height:7px;border-radius:4px;box-shadow:inset 0 0 0 1.5px #2F3A33;
+  background:linear-gradient(90deg,var(--fill) calc(var(--v,1)*100%),#5A6578 0)}
+.bar.hp{--fill:var(--hp)}
+.bar.exp{--fill:#3FA8F0;color:#9FD6FF}
+
+/* Cartões de informação */
+.meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.meta-card{background:var(--box);border:2px solid var(--line);border-radius:10px;padding:16px 18px;min-width:0}
+.meta-card h4{margin:0 0 6px;font-size:1.08rem;line-height:1.3}
+.meta-card p{margin:0;color:var(--muted);font-size:.95rem}
+.meta-card p+p{margin-top:8px}
+.meta-card p b{color:var(--ink)}
+
+/* Tabelas: caixa de diálogo com cabeçalho na cor da moldura */
+.tbl{overflow-x:auto;background:var(--box);border:3px solid var(--frame);border-radius:10px;margin-top:4px}
+table{border-collapse:collapse;width:100%;font-size:.94rem;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:9px 14px;vertical-align:top}
+th{font-family:var(--f-display);font-weight:500;font-size:.98rem;color:var(--box);background:var(--frame);white-space:nowrap}
+td{border-top:1.5px solid var(--line)}
+tbody tr:nth-child(even) td{background:var(--bg)}
+td.n{white-space:nowrap;font-family:var(--f-display);font-weight:500}
+
+/* Rotas por clã (Kanto 100–150) */
+.clan-routes{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.clan-routes .meta-card{--type:var(--frame);border-top:6px solid var(--type)}
+.clan-routes .meta-card h4{font-family:var(--f-display);font-weight:700;font-size:1.3rem}
+.clan-routes .meta-card p{color:var(--ink)}
+.clan-routes b{font-family:var(--f-display);font-weight:700;background:var(--type);color:#fff;padding:0 6px;border-radius:4px;margin-right:4px;text-shadow:0 1px 0 rgba(0,0,0,.35)}
+
+/* Checklist: pokébolas e barra de HP */
+.check-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.checks{padding:20px 22px;min-width:0}
+.checks h4{margin:0 0 10px;font-family:var(--f-display);font-weight:700;font-size:1.3rem}
+.check{display:flex;gap:12px;align-items:flex-start;padding:6px 0;cursor:pointer}
+.check input{appearance:none;-webkit-appearance:none;margin:3px 0 0;width:22px;height:22px;flex:none;border-radius:50%;cursor:pointer;
+  background:var(--box);border:2.5px solid var(--frame);display:grid;place-items:center}
+.check input:checked{border-color:#1E2533;
+  background:radial-gradient(circle,#fff 0 2.5px,#1E2533 3px 5px,transparent 5.5px),linear-gradient(var(--dex) 0 45%,#1E2533 45% 57%,#fff 57%)}
+.check input:checked+span{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--dex)}
+.progress{font-family:var(--f-display);font-weight:500;font-size:.95rem;color:var(--muted);margin-top:12px;font-variant-numeric:tabular-nums;display:grid;gap:6px}
+.progress::before{content:"";height:10px;border-radius:999px;border:2px solid var(--frame);
+  background:linear-gradient(90deg,var(--bar,var(--hp)) calc(var(--p,0)*100%),var(--frame-in) 0)}
+.checks[data-low] .progress{--bar:var(--hp-mid)}
+
+/* Clãs com cores de tipo */
+.clans{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.clan{--type:var(--frame);position:relative;text-align:left;font:inherit;color:var(--ink);background:var(--box);border:2.5px solid var(--line);border-radius:10px;
+  padding:12px 68px 12px 20px;cursor:pointer;display:grid;align-content:start;gap:2px;overflow:hidden;min-height:76px}
+.clan::before{content:"";position:absolute;inset:0 auto 0 0;width:8px;background:var(--type)}
+.clan img{position:absolute;right:-6px;bottom:-10px;width:72px;height:72px;image-rendering:pixelated;pointer-events:none}
+.clan b{font-family:var(--f-display);font-size:1.15rem;font-weight:700}
+.clan small{color:var(--muted);font-size:.82rem;line-height:1.35}
+.clan:hover{border-color:var(--type)}
+.clan[aria-pressed="true"]{border-color:var(--type);box-shadow:0 4px 0 var(--type)}
+.clan-detail{--type:var(--frame);margin-top:20px;padding:20px 22px}
+.clan-detail>img{float:right;width:128px;height:128px;margin:-8px -6px 0 12px;image-rendering:pixelated}
+.clan-detail h3{margin:0 0 8px;font-family:var(--f-display);font-size:1.6rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.type-pill{font-family:var(--f-display);font-size:.85rem;font-weight:500;color:#fff;background:var(--type);padding:1px 10px 2px;border-radius:999px;text-shadow:0 1px 0 rgba(0,0,0,.35)}
+.clan-detail p{margin:0 0 12px;max-width:65ch}
+.clan-detail dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;margin:0 0 16px}
+.clan-detail dt{font-family:var(--f-display);font-weight:500;color:var(--dex);padding-top:1px}
+.clan-detail dd{margin:0;min-width:0}
+.bonus{display:flex;flex-wrap:wrap;gap:6px}
+.bonus span{font-family:var(--f-display);font-size:.88rem;color:#fff;background:var(--type);border-radius:4px;padding:0 8px 1px;text-shadow:0 1px 0 rgba(0,0,0,.35);white-space:nowrap}
+.tiers{clear:both;display:grid;gap:10px;padding-top:16px;border-top:2px dashed var(--line)}
+.tier{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:start}
+.tier .tag{font-family:var(--f-display);font-weight:700;font-size:.92rem;text-align:center;padding:2px 0;border-radius:4px;background:var(--frame);color:var(--box)}
+.tier.top .tag{background:var(--zap);color:#3A2A00}
+.mons{display:flex;flex-wrap:wrap;gap:6px}
+.mon{font-size:.86rem;border:2px solid var(--line);border-radius:999px;padding:0 10px;background:var(--bg);line-height:1.6}
+.clan-detail .ranks{font-size:.92rem;color:var(--muted);margin:16px 0 0;max-width:72ch}
+.ranks b{color:var(--ink)}
+.clan-detail::after{content:"";display:block;clear:both}
+
+footer{margin-top:56px;padding-top:18px;border-top:3px dashed var(--line);color:var(--muted);font-size:.88rem;max-width:72ch;display:grid;gap:8px}
+footer ul{margin:0;padding-left:20px}
+
+@media (max-width:600px){
+  .dex-top{padding:14px 16px 18px}.lens{width:56px;height:56px}.lens::before{width:42px;height:42px}
+  .dex-name{display:none}.dex-screen{margin:18px 14px 0;padding:12px 12px 20px}.screen{padding:18px 16px 20px}
+  nav.tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}nav.tabs::-webkit-scrollbar{display:none}
+  .tab{flex:none;font-size:.95rem;padding:6px 10px 6px 22px}.tab::before{left:8px}
+  .dex-row img{width:60px;height:45px}
+}
+@media (max-width:480px){
+  .route{padding-left:34px}.stop::before{left:-36px;width:22px;height:22px}.route::before{left:10px}
+  .hunt dl,.clan-detail dl{grid-template-columns:1fr;gap:2px}.hunt dd,.clan-detail dd{margin-bottom:6px}
+  .stop{padding:14px 14px 16px}
+  .battle{height:184px}.battle img{width:96px;height:96px}
+  .battle .foe{right:8px;top:12px}.battle::before{right:-10px;top:84px;width:130px;height:30px}
+  .battle .ally{left:4px;bottom:-6px}.battle::after{left:-20px;width:150px;height:40px}
+  .mon-box{min-width:0;width:128px;font-size:.8rem;padding:4px 8px 6px}
+  .foe-box{left:8px;top:8px}.ally-box{right:8px;bottom:8px}
+  .party{grid-template-columns:repeat(3,1fr)}
+  .clan-detail>img{width:96px;height:96px}
+  .tier{grid-template-columns:1fr;gap:6px}.tier .tag{justify-self:start;padding:1px 10px}
+  th,td{padding:8px 10px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .check input.caught{animation:catch .7s ease-in-out}
+  @keyframes catch{0%,100%{transform:rotate(0)}20%{transform:rotate(-24deg)}45%{transform:rotate(18deg)}70%{transform:rotate(-8deg)}}
+}
+
+/* Momento único: a Pokédex liga ao abrir a página */
+@media (prefers-reduced-motion:no-preference){
+  .lens::before{animation:lens-on .9s ease-out both}
+  .led{animation:led-blink .3s steps(1) both}
+  .led.r{animation-delay:.15s}.led.y{animation-delay:.3s}.led.g{animation-delay:.45s}
+  @keyframes lens-on{0%{filter:brightness(.35) saturate(.4)}60%{filter:brightness(1.5)}100%{filter:none}}
+  @keyframes led-blink{0%{filter:brightness(.3)}100%{filter:none}}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="dex">
+  <div class="dex-top" aria-hidden="true">
+    <span class="lens"></span><span class="led r"></span><span class="led y"></span><span class="led g"></span>
+    <span class="dex-name">Rota do Treinador</span>
+  </div>
+  <div class="dex-screen">
+    <div class="screen">
+      <div class="kicker">Guia de fã do PokeXGames, atualizado em outubro de 2026</div>
+      <h1>Do level 1 ao Nightmare</h1>
+      <p class="lede">A rota de up atual em Johto, a rota clássica de Kanto, times por clã com a tier list da wiki oficial, held items, boost e o endgame: Outland, Mt. Silver e Nightmare World. Marque o checklist conforme avança.</p>
+      <ol class="party" aria-label="Pokémons marcantes da rota de Johto, por level">
+        <li><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vii/icons/63.png" alt="Abra"><span>Lv 1</span></li>
+        <li><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vii/icons/178.png" alt="Xatu"><span>Lv 60</span></li>
+        <li><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vii/icons/160.png" alt="Feraligatr"><span>Lv 80</span></li>
+        <li><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vii/icons/68.png" alt="Machamp"><span>Lv 120</span></li>
+        <li><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vii/icons/55.png" alt="Golduck"><span>Lv 150</span></li>
+        <li><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vii/icons/232.png" alt="Donphan"><span>Lv 180</span></li>
+      </ol>
+    </div>
+    <span class="speaker" aria-hidden="true"></span>
+  </div>
+</header>
+<div class="notice"><span class="bang" aria-hidden="true">!</span><span><b>Guia não oficial.</b> Os dados de clãs, tiers, held items, boost e regiões vêm da wiki oficial do PXG. A rota 1–200 vem do guia do pxgmap e a rota Kanto clássica de guias antigos de jogadores. O jogo muda com atualizações, então confirme valores na wiki e no Discord do seu clã antes de gastar itens caros.</span></div>
+
+<nav class="tabs" role="tablist" aria-label="Seções do guia">
+  <button class="tab" role="tab" id="t-com" aria-controls="p-com" aria-selected="true">Começar</button>
+  <button class="tab" role="tab" id="t-joh" aria-controls="p-joh" aria-selected="false">Rota Johto 1–200</button>
+  <button class="tab" role="tab" id="t-fas" aria-controls="p-fas" aria-selected="false">Dicas por fase</button>
+  <button class="tab" role="tab" id="t-cla" aria-controls="p-cla" aria-selected="false">Clãs e times</button>
+  <button class="tab" role="tab" id="t-hel" aria-controls="p-hel" aria-selected="false">Held items</button>
+  <button class="tab" role="tab" id="t-boo" aria-controls="p-boo" aria-selected="false">Boost</button>
+  <button class="tab" role="tab" id="t-end" aria-controls="p-end" aria-selected="false">150+ e endgame</button>
+  <button class="tab" role="tab" id="t-kan" aria-controls="p-kan" aria-selected="false">Rota Kanto clássica</button>
+  <button class="tab" role="tab" id="t-chk" aria-controls="p-chk" aria-selected="false">Checklist</button>
+</nav>
+
+<!-- COMEÇAR -->
+<section class="panel" id="p-com" role="tabpanel" aria-labelledby="t-com">
+  <h2>Antes de tudo: Johto ou Kanto?</h2>
+  <p class="intro">O PXG mudou bastante. Hoje a jornada começa em Johto, com um sistema de level próprio. Entender isso evita perder tempo no começo.</p>
+  <div class="meta-grid">
+    <div class="meta-card"><h4>Servidor novo: Snow</h4><p>Lançado em 3 de julho de 2026. Personagens novos começam em Johto e só podem sair da região no level 200. Kanto fica bloqueado até lá.</p><p>Nos primeiros 35 dias alguns sistemas ficaram travados, como EXP Boost, Daily Gift e as trocas de held tier 6 a 8 na NPC Victoria.</p></div>
+    <div class="meta-card"><h4>Regional Level de Johto</h4><p>Ao entrar em Johto pela primeira vez, sua força vira a de um level 5, só lá dentro. Ela é liberada aos poucos até o Regional Level 200.</p><p>No 200 você volta à força total e toda a XP ganha em Johto é somada ao seu level real. Só precisa fazer isso uma vez por conta.</p></div>
+    <div class="meta-card"><h4>Já tem personagem 200+?</h4><p>Você pode pular a progressão e entrar em Johto com o level original, mas sem as recompensas da jornada. Também é possível refazer a jornada para pegar as recompensas.</p><p>Dá para viajar entre Kanto e Johto livremente. Cada região usa seu próprio level. Veja os dois no Perfil, atalho <b>P</b>.</p></div>
+  </div>
+
+  <h3 class="sub">Os marcos que mudam o jogo</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Level</th><th>O que libera</th></tr></thead>
+    <tbody>
+      <tr><td class="n">~25</td><td>Unown Challenges nas Ruins of Alph</td></tr>
+      <tr><td class="n">60</td><td>Slowpoke Well Quest e quests das Dunes of Silence</td></tr>
+      <tr><td class="n">80</td><td>Escolha de clã. A partir daqui o bônus de clã passa a valer</td></tr>
+      <tr><td class="n">150</td><td>Outland e Mt. Silver (Serene Path). Os dois exigem VIP</td></tr>
+      <tr><td class="n">200</td><td>Saída de Johto, Nightmare World liberado (XP reduzida)</td></tr>
+      <tr><td class="n">250</td><td>Mt. Silver Fierce Expedition (250 a 450)</td></tr>
+      <tr><td class="n">300</td><td>XP completa nas hunts fracas do Nightmare World</td></tr>
+      <tr><td class="n">400</td><td>Hunts fortes do Nightmare World passam a dar XP e loot</td></tr>
+      <tr><td class="n">450+</td><td>Perde 1% de XP e loot por level nas hunts fracas do Nightmare</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 class="sub">Regras de ouro</h3>
+  <p class="intro">O meta muda a cada atualização. Estas regras continuam valendo.</p>
+  <div class="meta-grid">
+    <div class="meta-card"><h4>Boost vence raridade</h4><p>Cada ponto de boost vale como um level a mais para o pokémon. Um pokémon comum bem boostado rende mais que um raro sem investimento. Invista fundo em poucos.</p></div>
+    <div class="meta-card"><h4>Tipo vence level</h4><p>Escolha a hunt pela vantagem ou imunidade de tipo do seu time. Você mata mais rápido e quase não gasta potion.</p></div>
+    <div class="meta-card"><h4>Grupo vence solo</h4><p>No intermediário e no avançado, hunts em grupo dão mais XP e loot com menos risco de morrer.</p></div>
+    <div class="meta-card"><h4>Faça a Daily Catch sempre</h4><p>Duas capturas rápidas garantem a recompensa diária. Os Catcher Tokens trocam por Heavy Egg, que acelera chocar ovos.</p></div>
+    <div class="meta-card"><h4>Tasks em paralelo</h4><p>Pegue a task do pokémon que você já vai caçar. Isso soma XP extra sem tempo a mais, e ainda avança o Pokélog.</p></div>
+    <div class="meta-card"><h4>Venda o que não usa</h4><p>Pedras, itens e pokémons parados no depósito valem dinheiro. Converta em boost para o seu time principal.</p></div>
+    <div class="meta-card"><h4>Compre na baixa</h4><p>Preços de itens sobem logo depois de atualizações e eventos. Se puder esperar, compre quando o hype passar.</p></div>
+    <div class="meta-card"><h4>Confirme antes de gastar</h4><p>Antes de comprar algo caro, veja a wiki oficial, as notas de atualização e pergunte no Discord do clã o que está forte hoje.</p></div>
+  </div>
+</section>
+
+<!-- ROTA JOHTO -->
+<section class="panel" id="p-joh" role="tabpanel" aria-labelledby="t-joh" hidden>
+  <h2>Rota de up 1 ao 200 em Johto</h2>
+  <p class="intro">A rota atual para personagem novo: locais, tasks e quests de cada faixa, com os pokémons que você vai encontrar. Os respawns exatos com coordenadas ficam no mapa do pxgmap.</p>
+  <div class="route">
+    <article class="stop">
+      <span class="lv">LV 1 – 40</span>
+      <h4>Primeiros passos em Johto</h4>
+      <ul class="dex-row" data-mons="Poliwag:60,Goldeen:118,Slowpoke:79,Krabby:98,Abra:63,Charmander:4,Cyndaquil:155,Unown:201,Hoothoot:163"></ul>
+      <ul>
+        <li><b>Cherrygrove:</b> Poliwag e Goldeen nos primeiros levels.</li>
+        <li><b>Ilha a oeste da cidade:</b> Slowpoke e Krabby.</li>
+        <li><b>Ao norte:</b> capture um <b>Abra</b> logo cedo. Ele libera Teleport e economiza muito tempo de viagem.</li>
+        <li><b>Mt. Ember:</b> task de 40 Charmander e 40 Cyndaquil. Avança o estágio 1 do Pokélog.</li>
+        <li><b>Ruins of Alph (perto do 25):</b> Unown Challenges, com recompensa por andar da pirâmide.</li>
+        <li><b>Violet City:</b> Sprout Tower Quest.</li>
+        <li><b>Dungeon de Hoothoot:</b> uma vez por dia, para suprimentos e XP.</li>
+      </ul>
+      <p class="tip"><b>Dica:</b> guarde os Catcher Tokens da Daily Catch desde o começo para trocar pelo Heavy Egg.</p>
+    </article>
+    <article class="stop">
+      <span class="lv">LV 40 – 80</span>
+      <h4>Tasks grandes e primeiras quests</h4>
+      <ul class="dex-row" data-mons="Parasect:47,Beedrill:15,Butterfree:12,Fearow:22,Onix:95,Tangela:114,Tauros:128,Machoke:67,Alakazam:65,Xatu:178"></ul>
+      <ul>
+        <li><b>Oeste de Violet City:</b> task de 100 Parasect, mais Beedrill e Butterfree.</li>
+        <li><b>Mt. Ember:</b> task de 65 Fearow. Entregue também os Onix que capturar na região.</li>
+        <li><b>Palm Island:</b> task de 100 Tangela.</li>
+        <li><b>Outras tasks:</b> 100 Tauros e 50 Machoke.</li>
+        <li><b>Level 60+:</b> Slowpoke Well Quest e quests das Dunes of Silence.</li>
+        <li><b>Alakazam</b> rende boa XP nessa faixa. <b>Xatu</b> ao sul das Astral Ruins, do 60 ao 80, também adianta a daily do level 80.</li>
+        <li>Entregue 50 Pokélog Research Notes à Professora Magnolia para liberar a troca do Pokélog nas Ruins of Alph.</li>
+      </ul>
+      <p class="tip"><b>Naturia:</b> o Sceptile é uma boa opção nos primeiros ranks do clã. Ele não tem respawn mapeado, confira na wiki.</p>
+    </article>
+    <article class="stop">
+      <span class="lv">LV 80 – 120</span>
+      <h4>Clã escolhido, tasks de clã</h4>
+      <ul class="dex-row" data-mons="Feraligatr:160,Starmie:121,Gliscor:472,Pidgeot:18,Tyranitar:248,Mamoswine:473"></ul>
+      <ul>
+        <li><b>Feraligatr</b> em vários pontos de Johto dá boa XP.</li>
+        <li><b>Norbert Quest</b> (subsolo do Trade Center, perto da estação de trem): dá seu próprio Snom ou Frosmoth, bons para voar e para dano de gelo.</li>
+        <li><b>Tasks de clã:</b> Starmie nas Sunny Islands, Gliscor perto de Cianwood City e Pidgeot.</li>
+        <li><b>Dungeons de Tyranitar e Mamoswine (120+):</b> leve energias vermelhas e pokémons com muito dano em um turno.</li>
+      </ul>
+    </article>
+    <article class="stop">
+      <span class="lv">LV 120 – 150</span>
+      <h4>Quests e caça em quantidade</h4>
+      <ul class="dex-row" data-mons="Golem:76,Piloswine:221,Gengar:94,Machamp:68"></ul>
+      <ul>
+        <li><b>Rocket Quest</b> (dinheiro, XP e itens) e <b>Borin Quest</b>.</li>
+        <li><b>Caça em volume,</b> que também conta para Pokélog e daily: Golem perto de Silver Town, Piloswine perto de Blackthorn City, Gengar e Machamp perto de Ecruteak City.</li>
+        <li><b>XP rápida:</b> o minigame Alto Mare Tour, em Alto Mare City. Faça algumas corridas quando passar por lá.</li>
+      </ul>
+    </article>
+    <article class="stop">
+      <span class="lv">LV 150 – 200</span>
+      <h4>Mt. Silver e reta final</h4>
+      <ul class="dex-row" data-mons="Golduck:55,Kingdra:230,Donphan:232"></ul>
+      <ul>
+        <li><b>Borin Quest</b> antes da main de Mt. Silver: dá um <b>Held Item Ticket Tier 3</b>.</li>
+        <li><b>Golduck</b> nas dungeons de Mt. Silver: segundo a comunidade, ótima XP por hora. São instanciadas, então não aparecem no mapa.</li>
+        <li><b>Echoes of Mt. Silver Quest:</b> comece por volta do 160–170 para terminar perto do 200. Fale com o Ranger Mason na saída oeste de Silver Town, junte os fragmentos e suba a montanha derrotando cada andar em até 1h30.</li>
+        <li><b>Task de 300 Kingdra</b> nas Whirl Islands, em paralelo. Bônus de XP grande.</li>
+        <li><b>Reta final:</b> Donphan perto de Silver Town, o spot mais citado pela comunidade. Use XP Boost e stamina bônus da loja de Stream Drops.</li>
+      </ul>
+      <p class="tip"><b>Lembrete:</b> Mt. Silver exige level 150 e VIP. O transporte custa 4k por viagem, ou 1k com desconto.</p>
+    </article>
+  </div>
+</section>
+
+<!-- DICAS POR FASE -->
+<section class="panel" id="p-fas" role="tabpanel" aria-labelledby="t-fas" hidden>
+  <h2>Dicas por fase</h2>
+  <p class="intro">Conselhos gerais que valem em qualquer região: o que priorizar em cada etapa do jogo, sem gastar dinheiro à toa.</p>
+
+  <h3 class="sub" style="margin-top:8px">Iniciante</h3>
+  <p class="intro">Subir rápido, juntar um time básico e entender as mecânicas.</p>
+  <div class="route">
+    <article class="stop">
+      <span class="lv">LV 1 – 20</span>
+      <h4>Primeiros passos</h4>
+      <ul>
+        <li>Fale com os NPCs do tutorial e pegue seu pokémon inicial. Ele é só para começar; não se apegue.</li>
+        <li>Dê <b>dex</b> em todo pokémon novo que encontrar. Cada registro novo dá experiência, e no começo isso rende muito.</li>
+        <li>Comece a <b>pescar</b>. É XP e dinheiro seguros enquanto seu time é fraco. Suba o fishing junto com o level.</li>
+        <li>Capture pokémons fáceis de cada tipo. Capturar também dá XP e você vai precisar de variedade de tipos.</li>
+      </ul>
+      <p class="tip"><b>Dica:</b> se tiver um amigo mais forte, peça para ele segurar criaturas mais fortes enquanto você dá dex e joga pokébolas. Acelera muito o começo.</p>
+    </article>
+    <article class="stop">
+      <span class="lv">LV 20 – 50</span>
+      <h4>Time de verdade e primeiras tasks</h4>
+      <ul>
+        <li>Monte um time com pelo menos um pokémon de dano em área e um que aguente apanhar.</li>
+        <li>Faça as <b>tasks diárias</b> dos NPCs. Dão XP, dinheiro e itens sem exigir muito.</li>
+        <li>Cace em hunts onde seus ataques têm vantagem de tipo. Vantagem de tipo vale mais que level alto.</li>
+        <li>Leve sempre potions e revives. Voltar ao Centro Pokémon toda hora derruba seu XP por hora.</li>
+      </ul>
+    </article>
+    <article class="stop">
+      <span class="lv">LV 50 – 80</span>
+      <h4>Preparar a escolha do clã</h4>
+      <ul>
+        <li>Comece a pensar no clã. Ele define quais pokémons vão render mais para você no resto do jogo.</li>
+        <li>Guarde dinheiro e pedras de evolução em vez de gastar com tudo que aparece.</li>
+        <li>Teste pokémons de tipos diferentes para descobrir qual estilo você gosta de jogar.</li>
+      </ul>
+      <p class="tip"><b>Dica:</b> não escolha clã só porque é o "mais forte". Escolha pelo estilo e porque você vai ter amigos ou guilda no mesmo clã. Veja a aba Clãs e times.</p>
+    </article>
+  </div>
+
+  <h3 class="sub">Intermediário</h3>
+  <p class="intro">Com clã escolhido, o foco vira montar um time forte, aprender a usar held items e boost, e fazer dinheiro de forma consistente.</p>
+  <div class="route">
+    <article class="stop">
+      <span class="lv">LV 80 – 120</span>
+      <h4>Entrar no clã e montar o núcleo do time</h4>
+      <ul>
+        <li>Entre no clã e priorize pokémons do tipo do seu clã. O bônus do clã é o que separa um time bom de um ótimo.</li>
+        <li>Faça as missões e ranks do clã. Elas liberam bônus que valem mais que quase qualquer item.</li>
+        <li>Monte um núcleo de 2 ou 3 pokémons principais e invista neles. Espalhar recursos em 10 pokémons deixa todos fracos.</li>
+      </ul>
+    </article>
+    <article class="stop">
+      <span class="lv">LV 120 – 150</span>
+      <h4>Boost e held items</h4>
+      <ul>
+        <li>Use <b>boost</b> nos seus pokémons principais. Um pokémon bem boostado rende muito mais que um pokémon "melhor" sem boost.</li>
+        <li>Equipe <b>held items</b> que combinem com a função do pokémon: dano para quem mata, defesa ou vida para quem segura.</li>
+        <li>Comece a caçar em grupo (party). Hunts em grupo costumam render mais XP e loot com menos risco.</li>
+      </ul>
+      <p class="tip"><b>Dica:</b> antes de comprar held item caro, pergunte no Discord do clã qual combina com o seu pokémon no meta atual. Isso muda com balanceamentos.</p>
+    </article>
+    <article class="stop">
+      <span class="lv">LV 150 – 250</span>
+      <h4>Áreas de nível alto</h4>
+      <ul>
+        <li>Com pokémons principais boostados, comece a frequentar as áreas de nível alto, como as Outlands, onde o loot e as pedras caem mais.</li>
+        <li>Faça quests grandes que dão recompensas permanentes e itens raros.</li>
+        <li>Planeje o seu primeiro shiny ou pokémon forte de clã como meta de médio prazo.</li>
+      </ul>
+    </article>
+  </div>
+
+  <h3 class="sub">Avançado</h3>
+  <p class="intro">No endgame o jogo vira otimização: XP por hora, lucro por hora, conteúdo difícil em grupo e uso inteligente do mercado.</p>
+  <div class="route">
+    <article class="stop">
+      <span class="lv">LV 250+</span>
+      <h4>Conteúdo de endgame</h4>
+      <ul>
+        <li>Entre no conteúdo mais difícil, como as áreas Nightmare, dungeons e bosses. Quase sempre exige grupo organizado.</li>
+        <li>Defina funções no grupo: quem segura, quem dá dano, quem controla. Grupo sem função morre e perde loot.</li>
+        <li>Mantenha um time por situação: um para hunt, outro para boss, outro para PvP se você jogar.</li>
+      </ul>
+    </article>
+    <article class="stop">
+      <span class="lv">Otimização</span>
+      <h4>Medir para melhorar</h4>
+      <ul>
+        <li>Anote seu XP e lucro por hora em cada hunt. Troque de hunt quando o número cair, não quando a hunt "parecer" ruim.</li>
+        <li>Calcule o gasto com potions e revives. Uma hunt com muito XP mas gasto alto pode dar prejuízo.</li>
+        <li>Acompanhe as notas de atualização. Um balanceamento pode mudar qual hunt ou pokémon vale a pena.</li>
+      </ul>
+    </article>
+    <article class="stop">
+      <span class="lv">Longo prazo</span>
+      <h4>Shinies e pokémons de topo</h4>
+      <ul>
+        <li>Invista nos pokémons mais fortes do seu clã para endgame. Veja a tier list na aba Clãs e times e pergunte a jogadores de level alto do seu clã.</li>
+        <li>Boost alto em poucos pokémons ainda vale mais que boost médio em muitos.</li>
+        <li>Venda o que você não usa no mercado para financiar o que realmente importa.</li>
+      </ul>
+      <p class="tip"><b>Dica:</b> cuidado com trocas fora do sistema oficial do jogo. Golpes com itens e contas são comuns em jogos online.</p>
+    </article>
+  </div>
+</section>
+
+<!-- CLÃS -->
+<section class="panel" id="p-cla" role="tabpanel" aria-labelledby="t-cla" hidden>
+  <h2>Clãs e melhores pokémons</h2>
+  <p class="intro">A escolha de clã é no level 80. Cada clã dá bônus de ataque e defesa nos seus tipos, que cresce com o rank. O bônus de ataque vale para golpes do tipo do clã até em pokémons de outro clã. Toque em um clã para ver o estilo e o time.</p>
+  <p class="legend"><b>Como ler os tiers:</b> a wiki agrupa os pokémons em 1A, 1B, 1C, 1H, 2 e 3. Os de Tier 1 são os mais fortes do clã. <b>1H</b> é só para PvE: fora do Nightmare World têm força de 1C e dentro dele ficam mais fortes, mas não podem ser usados em duelo. Pokémons com * pertencem a outro clã no PvP.</p>
+  <div class="clans" id="clans"></div>
+  <div class="clan-detail" id="clan-detail" aria-live="polite"></div>
+
+  <h3 class="sub">Como montar um time bom</h3>
+  <div class="meta-grid">
+    <div class="meta-card"><h4>Comece pelo Tier 2</h4><p>Os Tier 2 e 3 do seu clã são os que você consegue cedo. Eles carregam você até ter recursos para um Tier 1.</p></div>
+    <div class="meta-card"><h4>Tenha um tank e um de dano</h4><p>Pelo menos um pokémon que aguenta apanhar e um que mata rápido. A wiki marca a função de alguns, como o Shiny Magmar (tank) do Volcanic.</p></div>
+    <div class="meta-card"><h4>Cubra fraquezas</h4><p>Leve um pokémon de outro tipo para hunts onde o tipo do seu clã apanha. O bônus de ataque do clã continua valendo nos golpes do seu tipo.</p></div>
+    <div class="meta-card"><h4>Use TM e TR</h4><p>Vários pokémons de clã têm versão com Technical Machine (TM) ou Technical Record (TR), que mudam os golpes. Confira a página do pokémon na wiki.</p></div>
+  </div>
+</section>
+
+<!-- HELD ITEMS -->
+<section class="panel" id="p-hel" role="tabpanel" aria-labelledby="t-hel" hidden>
+  <h2>Held items</h2>
+  <p class="intro">Itens que você equipa nos pokémons. Vão do tier 1 ao 9. Cada pokémon carrega no máximo 2 helds: um do tipo <b>X</b> e um do tipo <b>Y</b>.</p>
+  <div class="notice warn"><span class="bang" aria-hidden="true">!</span><span><b>Cuidado:</b> equipar um held do mesmo tipo de um que já está no pokémon faz o antigo ser <b>perdido</b>. Para tirar sem perder, pague o NPC Apollo no Trade Center.</span></div>
+
+  <h3 class="sub" style="margin-top:8px">Qual usar em cada função</h3>
+  <div class="meta-grid">
+    <div class="meta-card"><h4>Pokémon de dano</h4><p><b>X-Attack</b> (força +8% a +31%) ou <b>X-Critical</b> (8% a 27% de chance de crítico). Para quem tem muito cooldown, <b>X-Cooldown</b>.</p></div>
+    <div class="meta-card"><h4>Tank</h4><p><b>X-Defense</b> (+8% a +27%), <b>X-Block</b> (6% a 25% de chance de bloquear 90% do golpe) ou <b>X-Vitality</b> (+5% a +25% de vida).</p></div>
+    <div class="meta-card"><h4>Hunt em Kanto e Johto</h4><p><b>X-Experience</b> (+10% a +40% de XP) e <b>X-Lucky</b> (+10% a +150% de chance de drop). No Y, <b>Y-Regeneration</b> para curar fora de batalha.</p></div>
+    <div class="meta-card"><h4>Nightmare World</h4><p>X-Experience, X-Lucky, X-Return e Y-Regeneration <b>não funcionam lá</b>, e o X-Elemental funciona só metade das vezes. Use helds de ataque e defesa.</p></div>
+    <div class="meta-card"><h4>Utilidade (Y)</h4><p><b>Y-Teleport</b> reduz o cooldown do teleporte, <b>Y-Wing</b> deixa o voo mais rápido, <b>Y-Cure</b> remove status negativo (não funciona em duelo).</p></div>
+    <div class="meta-card"><h4>Mt. Silver</h4><p>Na Fierce Expedition, o NPC Magnus deixa ancorar um X-Lucky ou X-Experience no totem para um bônus permanente na zona.</p></div>
+  </div>
+
+  <h3 class="sub">Como conseguir</h3>
+  <div class="meta-grid">
+    <div class="meta-card"><h4>Duelist Brotherhood</h4><p>A principal fonte de helds é essa quest.</p></div>
+    <div class="meta-card"><h4>Held Item Ticket</h4><p>Troque 1 ticket por 1 held X (Attack, Defense, Critical, Block ou Accuracy) com a NPC Victoria. T3 vem da Borin Quest e de Mistérios das Ruínas de Alph, T4 da quest Nena, T6 e T7 do Torneio Global.</p></div>
+    <div class="meta-card"><h4>Fusão</h4><p>Na New Island, junte 3 helds do mesmo tier e receba 1 aleatório do tier acima. Exige ter feito Mewtwo Clones ao menos uma vez. X-Block não funde.</p></div>
+  </div>
+
+  <h3 class="sub">Custo de fusão e de remoção</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Tier</th><th>Fundir para o próximo</th><th>Remover do pokémon (Apollo)</th></tr></thead>
+    <tbody>
+      <tr><td class="n">1</td><td>60.000</td><td>10K</td></tr>
+      <tr><td class="n">2</td><td>150.000</td><td>25K</td></tr>
+      <tr><td class="n">3</td><td>300.000</td><td>50K</td></tr>
+      <tr><td class="n">4</td><td>700.000</td><td>200K</td></tr>
+      <tr><td class="n">5</td><td>1.000.000</td><td>900K</td></tr>
+      <tr><td class="n">6</td><td>1.500.000</td><td>2,5KK</td></tr>
+      <tr><td class="n">7</td><td>1.500.000 (resulta em outro T7)</td><td>5KK</td></tr>
+      <tr><td class="n">8</td><td>–</td><td>15KK</td></tr>
+      <tr><td class="n">9</td><td>–</td><td>30KK</td></tr>
+    </tbody>
+  </table></div>
+  <p class="tip"><b>Fusão de três T7</b> dá só Defense, Wing, Teleport, Lucky, Critical ou Attack. Para chegar ao T8 de um held X, use o <b>X-Upgrade</b>.</p>
+
+  <h3 class="sub">Tabela completa</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Held</th><th>Tipo</th><th>Efeito</th><th>Valor (tier baixo → alto)</th></tr></thead>
+    <tbody id="held-rows"></tbody>
+  </table></div>
+</section>
+
+<!-- BOOST -->
+<section class="panel" id="p-boo" role="tabpanel" aria-labelledby="t-boo" hidden>
+  <h2>Boost</h2>
+  <p class="intro">Cada ponto de boost aumenta força e vida do pokémon como se fosse um level a mais do treinador. Um Charizard +10 com treinador level 90 equivale a um Charizard +0 com treinador level 100.</p>
+  <div class="meta-grid">
+    <div class="meta-card"><h4>Limite pelo seu level</h4><p>Se o seu level não alcança o level do pokémon somado ao boost, o boost é cortado. Um Charizard +10 com treinador level 85 funciona como +5.</p></div>
+    <div class="meta-card"><h4>Boost máximo: +80</h4><p>Do +1 ao +50 usa pedras. Do +50 ao +70, uma Materia ou Powered Boost Stone por ponto. Do +70 ao +80, 1 Pink Star Piece e 5 Materias por ponto.</p></div>
+    <div class="meta-card"><h4>Onde boostar</h4><p>Nas máquinas de boost do laboratório do Professor Yves (oeste de Viridian), da Silph Co. em Saffron e do laboratório do Professor Elm em New Bark Town. Use <b>Boost Max</b> para gastar tudo de uma vez.</p></div>
+  </div>
+  <h3 class="sub">Quantas pedras até +50</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Tipo de boost do pokémon</th><th>Pedras comuns</th><th>Ancient, Metal ou Crystal</th></tr></thead>
+    <tbody>
+      <tr><td class="n">Boost 50</td><td>50 pedras</td><td>45 pedras</td></tr>
+      <tr><td class="n">Boost 30</td><td>70 pedras</td><td>65 pedras</td></tr>
+    </tbody>
+  </table></div>
+  <h3 class="sub">Materias (+50 ao +80)</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Materia</th><th>Para pokémons</th></tr></thead>
+    <tbody>
+      <tr><td class="n">Materia</td><td>Abaixo do level 80 (Tier 4)</td></tr>
+      <tr><td class="n">Enhanced Materia</td><td>Level 80 (Tier 3)</td></tr>
+      <tr><td class="n">Superior Materia</td><td>Level 100 (Tier 2)</td></tr>
+      <tr><td class="n">Mastered Materia</td><td>Level 100 (Tier 1)</td></tr>
+    </tbody>
+  </table></div>
+  <p class="tip"><b>Atenção:</b> cada clã tem as próprias Materias. Para pokémon Mega, use a Materia da forma base. Do +70 ao +80 o total é 10 Pink Star Pieces e 50 Materias.</p>
+</section>
+
+<!-- ENDGAME -->
+<section class="panel" id="p-end" role="tabpanel" aria-labelledby="t-end" hidden>
+  <h2>Level 150+ e endgame</h2>
+  <p class="intro">Três áreas principais depois do 150. Do mais fácil ao mais difícil: Outland e Mt. Silver Serene Path, depois Fierce Expedition, depois Nightmare World.</p>
+
+  <h3 class="sub" style="margin-top:8px">Outland (150+, VIP)</h3>
+  <p class="intro">Região fora do continente, acessada por portais em Cinnabar, Butwal e Power Plant. Precisa de pokémon com Fly no caminho. Tem shinies aleatórios, NPCs rank 5 de clã e os bosses Suicune, Entei e Raikou.</p>
+  <ul class="dex-row" data-mons="Suicune:245,Entei:244,Raikou:243"></ul>
+  <div class="meta-grid">
+    <div class="meta-card"><h4>Outland East</h4><p>Lutadores, fogo, veneno, fantasma, pedra e metal: Hitmonchan, Hitmonlee, Hitmontop, Arcanine, Charizard, Magmar, Nidoking, Nidoqueen, Gengar, Golem, Rhydon, Pupitar, Steelix.</p><p><b>Bom para:</b> Seavell, Psycraft, Volcanic.</p></div>
+    <div class="meta-card"><h4>Outland North</h4><p>Planta, psíquico, água e inseto: Meganium, Venusaur, Alakazam, Xatu, Hypno, Feraligatr, Blastoise, Gyarados, Scyther, Pinsir, Heracross.</p><p><b>Bom para:</b> Volcanic, Wingeon, Malefic, Raibolt. Boss Charm aumenta a chance de Mega Scizor nos Scyther.</p></div>
+    <div class="meta-card"><h4>Outland South</h4><p>Normal, voador, terra, elétrico, gelo: Miltank, Granbull, Skarmory, Pidgeot, Crobat, Donphan, Electabuzz, Ampharos, Typhlosion, Cloyster, Dragonair, Jynx.</p><p><b>Bom para:</b> Gardestrike, Ironhard, Volcanic.</p></div>
+  </div>
+  <p class="legend" style="margin-top:10px">"Bom para" é sugestão pela vantagem de tipo, não vem da wiki.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Quest da Outland (lv 150)</th><th>Recompensa</th></tr></thead>
+    <tbody>
+      <tr><td class="n">Welcome To The Outland</td><td>250 Revives, 300k XP. Faça primeiro, ela ensina as rotas</td></tr>
+      <tr><td class="n">Outland Rescue</td><td>2KK XP, pedras e cash do seu clã</td></tr>
+      <tr><td class="n">Outland Elders</td><td>12KK XP e teleporte ao altar das Bestas Lendárias</td></tr>
+      <tr><td class="n">Outland Main</td><td>22KK XP, outfit, 800K, Elemental Egg, pedras, boxes e Clan doll</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 class="sub">Mt. Silver (150+, VIP)</h3>
+  <div class="meta-grid">
+    <div class="meta-card"><h4>Serene Path, 150 a 300</h4><p>Primeira área. Tem a main quest Echoes of Mt. Silver, com o Ranger Mason. Concluir libera a versão avançada.</p></div>
+    <div class="meta-card"><h4>Fierce Expedition, 250 a 450</h4><p>As mesmas áreas com pokémons mais fortes e mais XP. É a etapa antes do Nightmare World. Transporte de 8k, ou 2k com desconto.</p></div>
+    <div class="meta-card"><h4>Zonas e bônus</h4><p>Pokémons como Tyranitar, Dragonite, Scizor, Weavile, Lapras, Steelix e Golduck. O NPC Silas Gildore troca 20 Rough Diamond, 20 South Sea Pearl e 99 Tanzanite Crystal por uma semana de chance extra de shiny em uma lista.</p></div>
+  </div>
+
+  <h3 class="sub">Nightmare World (200+, ideal 300+)</h3>
+  <p class="intro">Kanto destruída pelos pesadelos do Darkrai, em 2038. Entre pela caverna embaixo do farol do Bill, em Cerulean: fale com o Celebi, faça o salto no tempo e o tutorial com o Tracey. Há 6 Resistências (Cerulean, Cinnabar, Fuchsia, Lavender, Pallet, Pewter) e trocar de residência é grátis.</p>
+  <div class="meta-grid">
+    <div class="meta-card"><h4>Nightmare Level (NL)</h4><p>Progredir no NW sobe seu NL, que dá levels bônus só lá dentro, mostrados como (+X). O bônus cai conforme seu level base sobe. NL máximo 100, e o level total nunca passa de 600.</p></div>
+    <div class="meta-card"><h4>XP por level</h4><p>Hunts fracas dão XP reduzida abaixo do 300. Hunts fortes não dão nada abaixo do 400. Acima do 450, você perde 1% por level nas fracas.</p></div>
+    <div class="meta-card"><h4>O que não funciona lá</h4><p>Fly, Surf, Teleport e Control Mind. Potions e Revives antigos, Elixirs de XP, Smeargle, totens de Fortune, e os helds X-Experience, X-Lucky, X-Return e Y-Regeneration.</p></div>
+    <div class="meta-card"><h4>Exemplo: Mixed Fire</h4><p>Fire Island, para 400+. Boss Mega Houndoom. Use água, terra e pedra. Clãs recomendados: Seavell e Orebound. Task de 200 Ninetales, Torkoal e Houndoom: 4KK XP. Leve Lum Berry e Occa Berry.</p></div>
+  </div>
+  <h3 class="sub">Limite diário de Nightmare Tokens</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Nightmare Level</th><th>Tokens por dia</th></tr></thead>
+    <tbody>
+      <tr><td class="n">0 – 19</td><td>6</td></tr><tr><td class="n">20 – 29</td><td>8</td></tr><tr><td class="n">30 – 39</td><td>10</td></tr><tr><td class="n">40 – 49</td><td>12</td></tr>
+      <tr><td class="n">50 – 59</td><td>15</td></tr><tr><td class="n">60 – 79</td><td>18</td></tr><tr><td class="n">80 – 94</td><td>20</td></tr><tr><td class="n">95 – 100</td><td>25</td></tr>
+    </tbody>
+  </table></div>
+  <p class="tip"><b>Tokens</b> vêm de tasks, de derrotar NPCs da Nightmare Brotherhood e das Daily Missions. A lista completa de hunts do NW, filtrável por clã, fica na página Nightmare Hunts da wiki.</p>
+</section>
+
+<!-- KANTO CLÁSSICA -->
+<section class="panel" id="p-kan" role="tabpanel" aria-labelledby="t-kan" hidden>
+  <h2>Rota Kanto clássica</h2>
+  <p class="intro">Rota clássica da comunidade para upar rápido em Kanto: qual pokémon usar, onde caçar e quanto rende. Os valores de XP por hora servem como comparação entre hunts, não como número exato.</p>
+  <div class="notice warn"><span class="bang" aria-hidden="true">!</span><span><b>Rota antiga.</b> Compilada de guias de jogadores de 2013 a 2018, de antes de Johto virar o começo do jogo. Serve para quem joga em servidor antigo ou já passou do 200. Spawns e XP podem ter mudado.</span></div>
+
+  <div class="route">
+    <article class="stop hunt">
+      <div class="battle" data-env="water" data-ally="175" data-ally-n="Togepi" data-foe="129" data-foe-n="Magikarp" data-lv="5 – 15" data-xp="8"></div>
+      <h4>Pesca de Magikarp</h4>
+      <dl>
+        <dt>Time</dt><dd>Seu inicial. Se conseguir, um Togepi.</dd>
+        <dt>Onde</dt><dd>Pesque perto de Cerulean, Viridian ou Vermilion, para ficar perto do Centro Pokémon.</dd>
+        <dt>Alvo</dt><dd>Magikarp <span class="xp">2k–8k/h</span> <span class="xp">até 120k/h com ajuda</span></dd>
+      </dl>
+      <p class="tip"><b>Dica:</b> o salto de XP vem de pescar junto com alguém de fishing alto. Peça ajuda a um amigo.</p>
+    </article>
+    <article class="stop hunt">
+      <div class="battle" data-env="grass" data-ally="100" data-ally-n="Voltorb" data-foe="16" data-foe-n="Pidgey" data-lv="15 – 20" data-xp="25"></div>
+      <h4>Primeira hunt</h4>
+      <dl>
+        <dt>Time</dt><dd>Voltorb, Bellsprout ou Oddish. Use a isca Worm (fishing 10, NPC Guru).</dd>
+        <dt>Onde</dt><dd>Pidgey com Voltorb, ou Paras em Shamouti com Pidgey ou Spearow.</dd>
+        <dt>Rende</dt><dd>Hunt <span class="xp">20k–25k/h</span> Pesca <span class="xp">5k–10k/h</span></dd>
+      </dl>
+    </article>
+    <article class="stop hunt">
+      <div class="battle" data-env="grass" data-ally="81" data-ally-n="Magnemite" data-foe="17" data-foe-n="Pidgeotto" data-lv="20 – 30" data-xp="35"></div>
+      <h4>Elétrico nos voadores</h4>
+      <dl>
+        <dt>Time</dt><dd>Magnemite e Voltorb. Pesque com isca Seaweed (fishing 25).</dd>
+        <dt>Onde</dt><dd>Pidgeotto em Cerulean ou Viridian com Magnemite, ou Spearow em Shamouti com Voltorb.</dd>
+        <dt>Rende</dt><dd>Hunt <span class="xp">25k–35k/h</span> Pesca <span class="xp">15k–30k/h</span></dd>
+      </dl>
+    </article>
+    <article class="stop hunt">
+      <div class="battle" data-env="grass" data-ally="77" data-ally-n="Ponyta" data-foe="70" data-foe-n="Weepinbell" data-lv="30 – 40" data-xp="40"></div>
+      <h4>Fogo e voador nas plantas</h4>
+      <dl>
+        <dt>Time</dt><dd>Ponyta ou Pidgeotto. Bulbasaur, Weepinbell ou Gloom como apoio.</dd>
+        <dt>Onde</dt><dd>Weepinbell e Gloom em Cerulean ou Shamouti. Depois, Geodude e o 2º andar do Rock Tunnel.</dd>
+        <dt>Rende</dt><dd>Hunt <span class="xp">30k–40k/h</span></dd>
+      </dl>
+      <p class="tip"><b>Cuidado:</b> o Poison Gas da Gloom machuca. A partir daqui libera a daily Principiante com o NPC Leiko.</p>
+    </article>
+    <article class="stop hunt">
+      <div class="battle" data-env="grass" data-ally="104" data-ally-n="Cubone" data-foe="179" data-foe-n="Mareep" data-lv="40 – 50" data-xp="150"></div>
+      <h4>Cubone nos Mareep</h4>
+      <dl>
+        <dt>Time</dt><dd>Cubone. Por ser tipo terra, quase não leva dano dos elétricos.</dd>
+        <dt>Onde</dt><dd>Mareep em Hamlin. Pesque com isca Fish (fishing 40) ou Shrimp (fishing 50) usando Gloom ou Weepinbell.</dd>
+        <dt>Rende</dt><dd>Hunt <span class="xp">130k–150k/h</span> Pesca <span class="xp">40k–55k/h</span></dd>
+      </dl>
+      <p class="tip"><b>Por que é rápido:</b> imunidade de tipo. Você quase não gasta potion, então não para de matar.</p>
+    </article>
+    <article class="stop hunt">
+      <div class="battle" data-env="grass" data-ally="67" data-ally-n="Machoke" data-foe="128" data-foe-n="Tauros" data-lv="45 – 60" data-xp="180"></div>
+      <h4>Machoke nos Tauros</h4>
+      <dl>
+        <dt>Time</dt><dd>Machoke a partir do 45. Alternativas: Elekid ou Electrode nos Fearow, Golbat nas plantas, Vileplume ou Tangela nos Onix.</dd>
+        <dt>Onde</dt><dd>Tauros em Shamouti ou Fuchsia. Fearow em Shamouti ou Wildwind Island (VIP).</dd>
+        <dt>Rende</dt><dd>Hunt <span class="xp">140k–180k/h</span> Pesca com isca Kept <span class="xp">60k–70k/h</span></dd>
+      </dl>
+      <p class="tip">Libera a daily Fácil com a NPC Miyuki.</p>
+    </article>
+    <article class="stop hunt">
+      <div class="battle" data-env="cave" data-ally="114" data-ally-n="Tangela" data-foe="95" data-foe-n="Onix" data-lv="60 – 80" data-xp="200"></div>
+      <h4>Tangela nos Onix</h4>
+      <dl>
+        <dt>Time</dt><dd>Tangela, que economiza muita potion. Golbat continua bom em Vileplume e Victreebel.</dd>
+        <dt>Onde</dt><dd>Onix no subsolo de Shamouti até o 57. Com o Power Whip, vá para os Golem do Rock Tunnel ou de Shamouti.</dd>
+        <dt>Rende</dt><dd>Hunt <span class="xp">160k–200k/h</span> Pesca com isca Steak <span class="xp">70k–80k/h</span></dd>
+      </dl>
+      <p class="tip"><b>Bônus:</b> os Onix também dão bom dinheiro em loot. Libera a daily Média com a NPC Amaya.</p>
+    </article>
+    <article class="stop hunt">
+      <div class="battle" data-env="grass" data-ally="shiny/47" data-ally-n="Parasect ★" data-foe="154" data-foe-n="Meganium" data-lv="70 – 100" data-xp="230"></div>
+      <h4>Antes do clã</h4>
+      <dl>
+        <dt>Time</dt><dd>Shiny Parasect, Machamp, Noctowl ou Golduck.</dd>
+        <dt>Onde</dt><dd>Shiny Parasect nos Meganium de Butwal (muito disputado, rende até o 100). Machamp nos Steelix e, no 95, em Ursaring, Miltank e Snorlax de Shamouti. Noctowl nos Venusaur de Fuchsia ou Jungle Island.</dd>
+        <dt>Rende</dt><dd>Hunt <span class="xp">200k–230k/h</span> Pesca com isca Big Steak</dd>
+      </dl>
+      <p class="tip">Libera a daily Difícil com o NPC Junko. A escolha de clã fica no Trade Center, com o NPC Master.</p>
+    </article>
+  </div>
+
+  <h3 class="sub">Do level 100 ao 150+, por clã</h3>
+  <p class="intro">Regra geral: no 150, vá para as Outlands com seu pokémon principal com boost de pelo menos +30 (alguns clãs pedem +50). Cace sempre em grupo quando puder.</p>
+  <div class="clan-routes">
+    <div class="meta-card" style="--type:#E2621F"><h4>Volcanic</h4><p><b>100+</b> Magmar em Skarmory, Venusaur e Meganium. Ice Quest para Ice Stone.</p><p><b>150</b> Magmar ou Typhlosion +30 em Ice Quest ou Outlands de planta e gelo. Typhlosion boostado vai bem em Orre.</p></div>
+    <div class="meta-card" style="--type:#4A7FE0"><h4>Seavell</h4><p><b>100+</b> Blastoise, Swampert ou Mantine em Magmar Hell ou Rock Tunnel. Shiny Vaporeon no Charizard Valley.</p><p><b>150</b> Shiny Vaporeon ou Mantine +30 nas Outlands de fogo e pedra. Lapras +50 nas de veneno ou terra.</p></div>
+    <div class="meta-card" style="--type:#D9A800"><h4>Raibolt</h4><p><b>100–120</b> Electabuzz ou Manectric em voadores e água. Com +20, Ice Quest, Kinnow Island ou Charicific Valley <span class="xp">250k–310k/h</span></p><p><b>150–160</b> Electabuzz ou Manectric +50 nas Outlands de água e voador.</p></div>
+    <div class="meta-card" style="--type:#4FA33A"><h4>Naturia</h4><p><b>120+</b> Scizor +10 em Ice Quest ou Butwal <span class="xp">270k–310k/h</span></p><p><b>150</b> Shiny Vileplume bem boostado nas Outlands de água e pedra. Em Orre, Ludicolo e Swampert.</p></div>
+    <div class="meta-card" style="--type:#A08A2A"><h4>Orebound</h4><p><b>100+</b> Steelix em Ice Quest, Lightning Island ou Power Plant. Shiny Golem no Charizard Valley.</p><p><b>150</b> Steelix ou Golem +30 nas Outlands elétrica, de fogo ou de veneno <span class="xp">350k–420k/h</span></p></div>
+    <div class="meta-card" style="--type:#7B4A9E"><h4>Malefic</h4><p><b>100+</b> Crobat nos Meganium. Gengar ou Houndoom nos Alakazam.</p><p><b>150</b> Seviper +30 nas Outlands. Em Phenac, Sceptile, Shiftry e Ludicolo.</p></div>
+    <div class="meta-card" style="--type:#E0457B"><h4>Psycraft</h4><p><b>100+</b> Girafarig ou Smeargle em Gengar Hell. Shiny Hypno nos Venusaur.</p><p><b>150</b> Slowking, Gardevoir ou Bronzong nas Outlands. A de lutador é a que mais rende <span class="xp">800k–900k/h</span></p></div>
+    <div class="meta-card" style="--type:#7D63D6"><h4>Wingeon</h4><p><b>100+</b> Skarmory em planta e lutador. Imune a terra, então cace pokémons de terra também.</p><p><b>150</b> Shiny Fearow +30 nas Outlands de planta e lutador.</p></div>
+    <div class="meta-card" style="--type:#B8322C"><h4>Gardestrike</h4><p><b>100+</b> Elite Hitmontop nos Steelix do Rock Tunnel. Rende XP e loot.</p><p><b>150</b> Machamp ou Hitmontop +30. Outland normal <span class="xp">700k–900k/h</span></p></div>
+    <div class="meta-card" style="--type:#7A8AA6"><h4>Ironhard</h4><p><b>100+</b> Steelix nos elétricos (é imune). Scizor ou Skarmory em planta e veneno. Lucario em pedra e metal.</p><p><b>150</b> Outlands de pedra, planta e veneno.</p></div>
+  </div>
+</section>
+
+<!-- CHECKLIST -->
+<section class="panel" id="p-chk" role="tabpanel" aria-labelledby="t-chk" hidden>
+  <h2>Checklist de progresso</h2>
+  <p class="intro">Marque conforme avança. Fica salvo neste navegador.</p>
+
+  <h3 class="sub" style="margin-top:8px">Marcos da rota</h3>
+  <div class="check-grid">
+    <div class="checks"><h4>1 ao 80</h4>
+      <label class="check"><input type="checkbox" id="c1"><span>Capturei um Abra para ter Teleport</span></label>
+      <label class="check"><input type="checkbox" id="c2"><span>Faço a Daily Catch todo dia</span></label>
+      <label class="check"><input type="checkbox" id="c3"><span>Fiz as tasks de Charmander e Cyndaquil no Mt. Ember</span></label>
+      <label class="check"><input type="checkbox" id="c4"><span>Fiz a Sprout Tower Quest</span></label>
+      <label class="check"><input type="checkbox" id="c5"><span>Liberei a troca do Pokélog com a Magnolia</span></label>
+      <div class="progress" aria-live="polite"></div></div>
+    <div class="checks"><h4>80 ao 150</h4>
+      <label class="check"><input type="checkbox" id="c6"><span>Escolhi meu clã</span></label>
+      <label class="check"><input type="checkbox" id="c7"><span>Fiz a Norbert Quest</span></label>
+      <label class="check"><input type="checkbox" id="c8"><span>Tenho um tank e um de dano boostados</span></label>
+      <label class="check"><input type="checkbox" id="c9"><span>Fiz Rocket Quest e Borin Quest</span></label>
+      <label class="check"><input type="checkbox" id="c10"><span>Equipei helds em todos os principais</span></label>
+      <div class="progress" aria-live="polite"></div></div>
+    <div class="checks"><h4>150 ao 200</h4>
+      <label class="check"><input type="checkbox" id="c11"><span>Troquei o Held Ticket T3 da Borin</span></label>
+      <label class="check"><input type="checkbox" id="c12"><span>Terminei Echoes of Mt. Silver</span></label>
+      <label class="check"><input type="checkbox" id="c13"><span>Fiz a task de 300 Kingdra</span></label>
+      <label class="check"><input type="checkbox" id="c14"><span>Saí de Johto no 200</span></label>
+      <div class="progress" aria-live="polite"></div></div>
+    <div class="checks"><h4>200+</h4>
+      <label class="check"><input type="checkbox" id="c15"><span>Fiz as 4 quests da Outland</span></label>
+      <label class="check"><input type="checkbox" id="c16"><span>Entrei no Nightmare World e fiz o tutorial</span></label>
+      <label class="check"><input type="checkbox" id="c17"><span>Cheguei no rank 5 do clã</span></label>
+      <label class="check"><input type="checkbox" id="c18"><span>Tenho um pokémon Tier 1 do clã +50</span></label>
+      <div class="progress" aria-live="polite"></div></div>
+  </div>
+
+  <h3 class="sub">Hábitos de treinador</h3>
+  <div class="check-grid">
+    <div class="checks"><h4>Iniciante</h4>
+      <label class="check"><input type="checkbox" id="c-ini-1"><span>Fiz o tutorial e peguei meu inicial</span></label>
+      <label class="check"><input type="checkbox" id="c-ini-2"><span>Estou pescando e subindo fishing</span></label>
+      <label class="check"><input type="checkbox" id="c-ini-3"><span>Tenho pokémons de pelo menos 4 tipos diferentes</span></label>
+      <label class="check"><input type="checkbox" id="c-ini-4"><span>Faço as tasks diárias</span></label>
+      <label class="check"><input type="checkbox" id="c-ini-5"><span>Ando sempre com potions e revives</span></label>
+      <label class="check"><input type="checkbox" id="c-ini-6"><span>Já sei qual clã quero</span></label>
+      <div class="progress" aria-live="polite"></div></div>
+    <div class="checks"><h4>Intermediário</h4>
+      <label class="check"><input type="checkbox" id="c-int-1"><span>Entrei no clã e estou fazendo as missões dele</span></label>
+      <label class="check"><input type="checkbox" id="c-int-2"><span>Tenho 2 ou 3 pokémons principais definidos</span></label>
+      <label class="check"><input type="checkbox" id="c-int-3"><span>Meus principais estão boostados</span></label>
+      <label class="check"><input type="checkbox" id="c-int-4"><span>Uso held items que combinam com cada função</span></label>
+      <label class="check"><input type="checkbox" id="c-int-5"><span>Tenho um grupo fixo para hunt</span></label>
+      <label class="check"><input type="checkbox" id="c-int-6"><span>Já caço em áreas de nível alto</span></label>
+      <div class="progress" aria-live="polite"></div></div>
+    <div class="checks"><h4>Avançado</h4>
+      <label class="check"><input type="checkbox" id="c-ava-1"><span>Faço conteúdo de endgame em grupo fixo</span></label>
+      <label class="check"><input type="checkbox" id="c-ava-2"><span>Tenho times separados por situação</span></label>
+      <label class="check"><input type="checkbox" id="c-ava-3"><span>Anoto XP e lucro por hora</span></label>
+      <label class="check"><input type="checkbox" id="c-ava-4"><span>Acompanho as notas de atualização</span></label>
+      <label class="check"><input type="checkbox" id="c-ava-5"><span>Tenho pelo menos um shiny forte no time</span></label>
+      <div class="progress" aria-live="polite"></div></div>
+  </div>
+</section>
+
+<footer>
+  <span>Guia feito por fã, sem ligação com a equipe do PokeXGames. Pokémon e nomes relacionados pertencem aos seus donos. Sprites do projeto PokeAPI.</span>
+  <span>Fontes:</span>
+  <ul>
+    <li><a href="https://wiki.pokexgames.com/index.php/Cl%C3%A3s" target="_blank" rel="noopener">Wiki oficial do PXG</a>: clãs, tiers, held items, boost, Outland, Mt. Silver, Nightmare World, Regional Level e servidor Snow</li>
+    <li><a href="https://pxgmap.com.br/en/guias/nivel-1-ao-200" target="_blank" rel="noopener">pxgmap: Rush 1 ao 200</a></li>
+    <li>Guias de jogadores de 2013 a 2018 (rota Kanto clássica e rotas por clã)</li>
+  </ul>
+</footer>
+</div>
+
+<script>
+(function(){
+  const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+  const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const SPR='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-iii/firered-leafgreen/';
+  const ICON='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vii/icons/';
+
+  // Abas
+  const tabs=[...document.querySelectorAll('.tab')], nav=document.querySelector('nav.tabs');
+  function show(id){
+    tabs.forEach(t=>{const on=t.getAttribute('aria-controls')===id;t.setAttribute('aria-selected',on);document.getElementById(t.getAttribute('aria-controls')).hidden=!on;
+      if(on&&nav.scrollWidth>nav.clientWidth)nav.scrollLeft=t.offsetLeft-nav.clientWidth/2+t.offsetWidth/2});
+    store.set('pxg-tab',id);
+  }
+  tabs.forEach(t=>t.addEventListener('click',()=>{show(t.getAttribute('aria-controls'));if(window.scrollY>nav.offsetTop)window.scrollTo({top:nav.offsetTop-4,behavior:'smooth'})}));
+  const hash=location.hash.slice(1), saved=store.get('pxg-tab');
+  if(hash&&tabs.some(t=>t.getAttribute('aria-controls')===hash)) show(hash);
+  else if(saved&&tabs.some(t=>t.getAttribute('aria-controls')===saved)) show(saved);
+
+  // Pokémons de cada faixa da rota
+  document.querySelectorAll('.dex-row').forEach(ul=>{
+    ul.setAttribute('aria-label','Pokémons desta faixa');
+    ul.innerHTML=ul.dataset.mons.split(',').map(p=>{const [n,id]=p.split(':');return '<li><img src="'+ICON+id+'.png" alt="'+esc(n)+'" title="'+esc(n)+'" loading="lazy"></li>'}).join('');
+  });
+
+  // Cenas de batalha das hunts (barra de EXP proporcional ao melhor XP/h da rota)
+  document.querySelectorAll('.battle').forEach(b=>{
+    const d=b.dataset;
+    b.setAttribute('role','img');
+    b.setAttribute('aria-label','Level '+d.lv+': '+d.allyN+' contra '+d.foeN);
+    b.innerHTML='<div class="mon-box foe-box"><div class="row"><b>'+esc(d.foeN)+'</b></div><i class="bar hp" data-k="HP"></i></div>'+
+      '<img class="foe" src="'+SPR+d.foe+'.png" alt="" loading="lazy">'+
+      '<img class="ally" src="'+SPR+'back/'+d.ally+'.png" alt="" loading="lazy">'+
+      '<div class="mon-box ally-box"><div class="row"><b>'+esc(d.allyN)+'</b><span>Lv '+esc(d.lv)+'</span></div><i class="bar exp" data-k="EXP" style="--v:'+(d.xp/230)+'"></i></div>';
+  });
+
+  // Checklists
+  document.querySelectorAll('.checks').forEach(box=>{
+    const inputs=[...box.querySelectorAll('input')], out=box.querySelector('.progress');
+    const upd=()=>{const n=inputs.filter(i=>i.checked).length;box.style.setProperty('--p',n/inputs.length);box.toggleAttribute('data-low',n>0&&n<inputs.length/2);out.textContent=n+' de '+inputs.length+' concluídos'+(n===inputs.length?'. Fase completa!':'')};
+    inputs.forEach(i=>{i.checked=store.get('pxg-'+i.id)==='1';
+      i.addEventListener('animationend',()=>i.classList.remove('caught'));
+      i.addEventListener('change',()=>{store.set('pxg-'+i.id,i.checked?'1':'0');i.classList.toggle('caught',i.checked);upd()})});
+    upd();
+  });
+
+  // Clãs: estilo e sprite do guia + bônus, ranks e tiers da wiki oficial
+  const clans=[
+    {n:'Volcanic',m:126,col:'#E2621F',t:'Fogo',s:'Dano alto e consistente. Ótimo para quem gosta de matar rápido em hunts.',f:'Quem quer um estilo ofensivo direto.',
+     b:['Fogo R5 28%','Fogo R6 30%'],r:'Spark → … → Ascendant',
+     a:['Shiny Magmar (tank)'],bb:['Shiny Growlithe','Shiny Arcanine'],
+     c:['Shiny Charizard','Mega Charizard X*','Mega Charizard Y*','Shiny Ninetales','Hisuian Arcanine*','Alolan Marowak*','Shiny Typhlosion','Mega Houndoom','Mega Blaziken','Shiny Infernape','Magmortar','Heatran','Shiny Delphox*','Shiny Cinderace','Mega Scovillain'],
+     h:['Shiny Houndoom','Shiny Chandelure','Mega Chandelure','Shiny Heatmor','Mega Pyroar'],
+     t2:['Ninetales','Arcanine','Shiny Rapidash','Magmar','Shiny Flareon*','Houndoom','Infernape','Darmanitan','Volcarona','Delphox','Talonflame','Cinderace']},
+    {n:'Seavell',m:9,col:'#4A7FE0',t:'Água e gelo',s:'Time versátil, com muitas opções de pokémons e boa presença em várias hunts.',f:'Quem quer flexibilidade e muitas escolhas.',
+     b:['Água R5 25%','Gelo R5 28%','Água R6 27%','Gelo R6 30%'],r:'Drop → Icelake → Waterfall → Frost → Queen/King → Ascendant',
+     a:['Shiny Gyarados'],bb:['Shiny Glaceon'],
+     c:['Shiny Blastoise','Mega Blastoise','Alolan Ninetales','Shiny Tentacruel','Mega Gyarados','Shiny Feraligatr','Shiny Lanturn','Shiny Politoed','Shiny Kingdra','Mega Swampert','Milotic','Shiny Empoleon','Mamoswine','Mega Baxcalibur'],
+     h:['Mega Starmie','Shiny Lapras','Mega Feraligatr','Mega Glalie','Shiny Floatzel','Mega Froslass'],
+     t2:['Shiny Golduck','Champion Poliwrath','Shiny Cloyster','Lapras','Shiny Vaporeon','Slowking','Kingdra','Ludicolo','Empoleon','Weavile','Greninja','Baxcalibur']},
+    {n:'Raibolt',m:125,col:'#D9A800',t:'Elétrico',s:'Dano rápido e bom controle. Pokémons elétricos costumam ser fortes desde cedo.',f:'Quem gosta de jogar rápido e agressivo.',
+     b:['Elétrico R5 28%','Elétrico R6 30%'],r:'Shock → Watt → Eletrician → Overcharger → Legend → Ascendant',
+     a:['Shiny Electabuzz'],bb:['Shiny Manectric'],
+     c:['Shiny Raichu','Mega Raichu X','Alolan Golem','Shiny Magneton','Shiny Lanturn','Shiny Ampharos','Mega Ampharos','Mega Manectric','Shiny Luxray','Electivire','Shiny Rotom','Giant Galvantula','Shiny Eelektross','Shiny Magnezone'],
+     h:['Shiny Pachirisu','Shiny Zebstrika','Shiny Toxtricity','Mega Eelektross'],
+     t2:['Light Ball Pikachu','Alolan Raichu','Shiny Electrode','Electabuzz','Shiny Jolteon','Shiny Elekid','Luxray','Magnezone','Rotom','Vikavolt','Toxtricity']},
+    {n:'Naturia',m:212,col:'#4FA33A',t:'Planta e inseto',s:'Mistura de dano, cura e controle. Costuma ser bom em suporte de grupo.',f:'Quem joga muito em party e gosta de ajudar o grupo.',
+     b:['Planta R5 25%','Inseto R5 28%','Planta R6 27%','Inseto R6 30%'],r:'Seed → Sprout → Webhead → Woodtrunk → Keeper → Ascendant',
+     a:['Mega Scizor'],bb:['Shiny Leafeon'],
+     c:['Mega Venusaur','Shiny Venusaur','Shiny Venomoth','Alolan Exeggutor','Shiny Pinsir','Mega Pinsir','Shiny Meganium','Shiny Scizor','Mega Heracross','Mega Sceptile','Shiny Torterra','Tangrowth','Giant Galvantula','Mega Golisopod','Mega Scovillain'],
+     h:['Mega Victreebel','Shiny Scyther','Shiny Tangela','Mega Meganium','Shiny Sceptile','Shiny Yanmega','Mega Scolipede'],
+     t2:['Mega Beedrill','Shiny Vileplume','Scyther','Scizor','Heracross','Ludicolo','Torterra','Roserade','Yanmega','Volcarona','Chesnaught','Kleavor']},
+    {n:'Orebound',m:76,col:'#A08A2A',t:'Pedra e terra',s:'Pokémons resistentes que aguentam apanhar. Bons para segurar hunts difíceis.',f:'Quem prefere ser a linha de frente.',
+     b:['Pedra/Terra R5 25%','Pedra/Terra R6 27%'],r:'Sand → Rock → Solid → Hardskin → Hero/Heroine → Ascendant',
+     a:['Golden Sudowoodo'],bb:['Shiny Larvitar','Shiny Pupitar'],
+     c:['Alolan Golem','Crystal Onix','Shiny Marowak','Shiny Rhydon','Aerodactyl','Mega Steelix','Shiny Magcargo','Mega Tyranitar','Mega Swampert','Shiny Torterra','Rhyperior','Shiny Gliscor','Mamoswine','Shiny Golurk','Mega Glimmora'],
+     h:['Mega Aerodactyl','Shiny Rampardos','Mega Excadrill','Shiny Krookodile','Ursaluna','Mega Barbaracle'],
+     t2:['Shiny Golem','Big Onix','Steelix','Shiny Donphan','Tyranitar','Aggron','Flygon','Garchomp','Gliscor','Krookodile','Lycanroc']},
+    {n:'Malefic',m:94,col:'#7B4A9E',t:'Fantasma, sombrio e veneno',s:'Dano forte com efeitos de status e debuff.',f:'Quem gosta de estilo estratégico e de desgaste.',
+     b:['Fantasma R5 25%','Veneno/Sombrio R5 28%','Fantasma R6 27%','Veneno/Sombrio R6 30%'],r:'Troublemaker → Venomancer → Spectre → Nightwalker → Lady/Lord → Ascendant',
+     a:['Mega Absol'],bb:['Shiny Gengar'],
+     c:['Shiny Venusaur','Shiny Venomoth','Shiny Tentacruel','Shiny Muk','Mega Gengar','Alolan Marowak','Shiny Umbreon','Mega Houndoom','Mega Sableye','Mega Sharpedo','Mega Banette','Shiny Honchkrow','Dusknoir','Shiny Froslass','Overqwil'],
+     h:['Mega Victreebel','Shiny Weavile','Mega Froslass*','Mega Scolipede','Shiny Garbodor','Zoroark','Mega Chandelure'],
+     t2:['Shiny Nidoking','Shiny Nidoqueen','Gengar','Shiny Crobat','Houndoom','Tyranitar','Absol','Spiritomb','Drapion','Weavile','Hydreigon']},
+    {n:'Psycraft',m:65,col:'#E0457B',t:'Psíquico e fada',s:'Dano em área e controle de inimigos.',f:'Quem gosta de controlar a luta.',
+     b:['Psíquico/Fada R5 28%','Psíquico/Fada R6 30%'],r:'Mind → Brain → Scholar → Telepath → Medium → Ascendant',
+     a:['Shiny Alakazam'],bb:['Shiny Sylveon'],
+     c:['Alolan Ninetales','Mega Alakazam','Shiny Mr. Mime','Shiny Jynx','Shiny Xatu','Shiny Espeon','Shiny Granbull','Mega Gardevoir','Mega Mawile*','Mega Altaria','Metagross','Shiny Bronzong','Shiny Gallade','Mega Gallade','Shiny Delphox','Wyrdeer'],
+     h:['Mega Clefable','Mega Starmie','Mega Meganium','Shiny Gardevoir','Shiny Togekiss','Shiny Gothitelle'],
+     t2:['Alolan Raichu','Shiny Clefable','Alakazam','Shiny Hypno','Slowking','Wobbuffet','Gardevoir','Bronzong','Togekiss','Gallade','Florges','Mimikyu']},
+    {n:'Wingeon',m:149,col:'#7D63D6',t:'Voador e dragão',s:'Mobilidade e acesso a dragões fortes no longo prazo.',f:'Quem pensa em investimento de longo prazo.',
+     b:['Voador/Dragão R5 28%','Voador/Dragão R6 30%'],r:'Cloud → Wind → Sky → Falcon → Dragon → Ascendant',
+     a:['Shiny Gyarados'],bb:['Shiny Dratini','Shiny Dragonair'],
+     c:['Shiny Charizard','Mega Charizard Y','Mega Charizard X*','Shiny Pidgeot','Elite Farfetch\'d','Shiny Dodrio','Mega Pinsir','Aerodactyl','Shiny Mantine','Mega Sceptile','Mega Altaria','Salamence','Shiny Honchkrow','Mega Garchomp','Mega Dragalge'],
+     h:['Mega Clefable','Mega Pidgeot','Mega Dragonite','Mega Feraligatr','Mega Skarmory','Shiny Skarmory','Shiny Hydreigon','Mega Hawlucha','Mega Drampa'],
+     t2:['Shiny Fearow','Gyarados','Dragonite','Shiny Crobat','Skarmory','Kingdra','Flygon','Garchomp','Togekiss','Haxorus','Hydreigon','Noivern']},
+    {n:'Gardestrike',m:68,col:'#B8322C',t:'Normal e lutador',s:'Dano físico forte e pokémons robustos.',f:'Quem quer um estilo corpo a corpo e simples.',
+     b:['Normal/Lutador R5 25%','Normal/Lutador R6 27%'],r:'Fist → Tamer → Fighter → Deathand → Champion → Ascendant',
+     a:['Shiny Snorlax'],bb:['Shiny Tauros'],
+     c:['Shiny Pidgeot','Alolan Raticate','Shiny Machamp','Elite Farfetch\'d','Mega Kangaskhan','Mega Heracross*','Shiny Stantler','Mega Blaziken','Slaking','Shiny Infernape','Mega Lucario','Porygon-Z','Mega Audino','Conkeldurr','Mega Falinks','Bloodmoon Ursaluna'],
+     h:['Shiny Heracross','Shiny Hariyama','Shiny Mienshao','Mega Pyroar','Mega Barbaracle','Mega Hawlucha','Mega Drampa','Ursaluna'],
+     t2:['Shiny Wigglytuff','Elite Hitmonlee','Elite Hitmonchan','Elite Hitmontop','Snorlax','Ursaring','Blissey','Exploud','Zangoose','Infernape','Braviary','Sneasler']},
+    {n:'Ironhard',m:208,col:'#7A8AA6',t:'Metálico e cristal',s:'Defesa muito alta e boa sobrevivência.',f:'Quem quer um time difícil de derrubar.',
+     b:['Metálico/Cristal R5 28%','Metálico/Cristal R6 30%'],r:'Smither → Forge → Hammer → Metal → Titan → Ascendant',
+     a:['Mega Scizor'],bb:['Mega Aggron'],
+     c:['Alolan Sandslash','Shiny Magneton','Crystal Onix','Mega Steelix','Golden Steelix','Shiny Scizor','Mega Mawile','Mega Chimecho','Shiny Empoleon','Shiny Bronzong','Mega Lucario','Shiny Magnezone','Heatran','Shiny Copperajah'],
+     h:['Mega Skarmory','Shiny Mawile','Shiny Aggron','Mega Metagross','Mega Excadrill','Shiny Aegislash'],
+     t2:['Shiny Forretress','Steelix','Scizor','Skarmory','Aggron','Empoleon','Bronzong','Shiny Lucario','Magnezone','Excadrill','Aegislash','Gholdengo']}
+  ];
+  const grid=document.getElementById('clans'), det=document.getElementById('clan-detail');
+  const chips=a=>a.map(m=>'<span class="mon">'+esc(m)+'</span>').join('');
+  const row=(tag,arr,top)=>'<div class="tier'+(top?' top':'')+'"><span class="tag">'+tag+'</span><div class="mons">'+chips(arr)+'</div></div>';
+  function pick(i){
+    [...grid.children].forEach((b,j)=>b.setAttribute('aria-pressed',i===j));
+    const c=clans[i];
+    det.style.setProperty('--type',c.col);
+    det.innerHTML='<img src="'+SPR+c.m+'.png" alt=""><h3>'+esc(c.n)+' <span class="type-pill">'+esc(c.t)+'</span></h3><p>'+esc(c.s)+'</p>'+
+      '<dl><dt>Combina com</dt><dd>'+esc(c.f)+'</dd><dt>Bônus</dt><dd class="bonus">'+c.b.map(x=>'<span>'+esc(x)+'</span>').join('')+'</dd><dt>Ranks</dt><dd>'+esc(c.r)+'</dd></dl>'+
+      '<div class="tiers">'+row('1A',c.a,1)+row('1B',c.bb,1)+row('1C',c.c)+row('1H',c.h)+row('T2',c.t2)+'</div>'+
+      '<p class="ranks"><b>Antes de entrar:</b> os requisitos de cada rank ficam na página de Tasks do clã, e o rank 6 exige The Rainbow Hero Quest e o Ascension Path. Confirme no Discord do clã quais pokémons estão fortes no meta atual e se há guilda ativa no seu horário.</p>';
+    store.set('pxg-clan',String(i));
+  }
+  clans.forEach((c,i)=>{const b=document.createElement('button');b.className='clan';b.type='button';b.style.setProperty('--type',c.col);b.innerHTML='<b>'+esc(c.n)+'</b><small>'+esc(c.t)+'</small><img src="'+SPR+c.m+'.png" alt="" loading="lazy">';b.addEventListener('click',()=>pick(i));grid.appendChild(b)});
+  const sc=parseInt(store.get('pxg-clan'),10); pick(Number.isInteger(sc)&&clans[sc]?sc:0);
+
+  // Held items (wiki oficial)
+  const helds=[
+    ['X-Attack','X','Aumenta a força','8% → 31% (T1–T8)'],
+    ['X-Critical','X','Chance de dano crítico','8% → 27% (T1–T8)'],
+    ['X-Defense','X','Aumenta a defesa','8% → 27% (T1–T8)'],
+    ['X-Block','X','Chance de bloquear 90% do golpe','6% → 25% (T1–T8)'],
+    ['X-Vitality','X','Aumenta a vida','5% → 25% (T1–T7)'],
+    ['X-Boost','X','Aumenta o boost, escala com seu level','6–15 → 18–45 (T1–T7)'],
+    ['X-Harden','X','Chance de usar Harden ao atacar','4% → 22% (T1–T7)'],
+    ['X-Cooldown','X','Reduz o cooldown dos golpes','11% / 14% / 17% (T3, T5, T7)'],
+    ['X-Experience','X','Mais XP de selvagens (não funciona no NW)','10% → 40% (T1–T7)'],
+    ['X-Lucky','X','Mais chance de drop (não funciona no NW)','10% → 150% (T1–T9)'],
+    ['X-Return','X','Devolve dano recebido, x10 contra selvagens','2,5% → 9% (T1–T7)'],
+    ['X-Accuracy','X','Mais chance de acertar status negativo','20% → 50% (T1–T7)'],
+    ['X-Elemental','X','Chance de usar a passiva do elemento','8% → 22% (T1–T7)'],
+    ['X-Poison / X-Hellfire','X','Aumenta dano de Poison / Burn','90% → 300% (T1–T7)'],
+    ['X-Rage / X-Strafe','X','Chance de usar Rage / Strafe','10% → 100% (T1–T7)'],
+    ['X-Agility','X','Chance de usar Agility','8% → 60% (T1–T7)'],
+    ['X-Haste','X','Aumenta a velocidade (não vale em Fly e Ride)','60 → 250 (T1–T7)'],
+    ['X-Upgrade','X','Sobe o tier de um held X equipado','3→4 até 7→8'],
+    ['Y-Regeneration','Y','Cura por segundo fora de batalha (não no NW)','700/s → 5000/s (T1–T7)'],
+    ['Y-Cure','Y','Chance de remover status negativo','45% → 100% (T1–T7)'],
+    ['Y-Teleport','Y','Reduz o cooldown do teleporte (minutos)','5 → 28 (T1–T8)'],
+    ['Y-Wing','Y','Voo mais rápido','100 → 420 (T1–T8)'],
+    ['Y-Control','Y','Reduz o cooldown do Control Mind (s)','40 → 160 (T1–T7)'],
+    ['Y-Antiburn / Y-Antipoison','Y','Metade do dano de Burn / Poison','T6 / T4'],
+    ['Y-Ghost, Y-Dig, Y-Cut…','Y','Ensinam a habilidade do nome','Sem tier']
+  ];
+  document.getElementById('held-rows').innerHTML=helds.map(h=>'<tr><td class="n">'+esc(h[0])+'</td><td>'+h[1]+'</td><td>'+esc(h[2])+'</td><td class="n">'+esc(h[3])+'</td></tr>').join('');
+})();
+</script>
+</body>
+</html>
